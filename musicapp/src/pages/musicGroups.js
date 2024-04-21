@@ -54,17 +54,23 @@ export function MusicGroups(props) {
       setAmountGroups(b);
     }
 
+    const onView = async (e) => {
+      console.log ("test info btn");
+    }
+
     return (
       <>
         <FormSearch searchFilter="" onSave={onSave} onUndo={onUndo}/>
         <p className='container px-4 py4'>There are {amountGroups} music groups that matches your search.</p>
-        <ul className='container px-4 py4'>
+        <div className='container px-4 py4'>
           {musicGroups.pageItems?.map((a) => (
-            <li key={a.musicGroupId}>
+            <div key={a.musicGroupId}>
+              <button className='btn btn-primary' onClick={onView}>More info</button>
               {a.name}
-            </li>
+              <p/>
+            </div>
           ))}          
-        </ul>
+        </div>
         <MusicPagination pageCount={musicGroups.pageCount} pageNr={0} onClick={onClick}/>
       </>
     );
