@@ -2,24 +2,40 @@ import React, {useState, useEffect} from 'react';
 import musicService from '../services/music-group-service';
 import {FormSearch} from '../components/form-search';
 import { MusicPagination } from '../components/pagination';
+import { Outlet, useParams, useNavigate, useOutletContext } from 'react-router-dom';
+import {AlbumDetailsView} from '../components/album-details-view';
+import AlbumList from '../components/album-list';
 
-export function MusicGroups(props) {
+export function MusicGroups()
+{
+    const service = new musicService(`https://appmusicwebapinet8.azurewebsites.net/api`);
+    return (
+      <div className="container px-4 py-4 text-start">
 
-  const [musicGroups, setMusicGroups] = useState({});
+          <h2 className="pb-2 border-bottom">Music Groups</h2>
+          <Outlet context={service}/>
+      </div>
+  );
+}
+
+export function MusicGroupsList() {
+
+  const service = useOutletContext();
+  const navigate = useNavigate();
+  const [serviceData, setServiceData] = useState();
+
   const [searchFilter, setSearchFilter] = useState("");
-  const [amountGroups, setAmountGroups] = useState(0);
  
   useEffect(() => {
     //To pre-load with filtered albums 
-    (async ()=> {
-      const service = new musicService(`https://appmusicwebapinet8.azurewebsites.net/api`);
-      const a = await service.readMusicGroupsAsync (0, true);
-      const b = a.dbItemsCount;
+    async function readWebApi() {
+      const a = await service.readMusicGroupsAsync(0, true, null, 10);
       console.log(a);
-      setMusicGroups(a);
-      setAmountGroups(b);
-    })();
-  }, []);
+
+      setServiceData(a);
+    }
+    readWebApi();
+  }, [service]);
 
   
   
@@ -28,13 +44,11 @@ export function MusicGroups(props) {
     {
       console.log (`onSave invoked`);
       
-      const service = new musicService(`https://appmusicwebapinet8.azurewebsites.net/api`);
       const a = await service.readMusicGroupsAsync (0, true, e.searchFilter);
-      const b = a.dbItemsCount;
-
-      setMusicGroups(a);
+    
+      setServiceData(a);
       setSearchFilter(e.searchFilter);
-      setAmountGroups(b);
+     
     }  
 
     const onUndo = (e) => 
@@ -46,32 +60,55 @@ export function MusicGroups(props) {
     const onClick = async (e) => {
       console.log ("onClick invoked");
 
-      const service = new musicService(`https://appmusicwebapinet8.azurewebsites.net/api`);
       const a = await service.readMusicGroupsAsync (e.pageNr, true, searchFilter);
-      const b = a.dbItemsCount;
 
-      setMusicGroups(a);
-      setAmountGroups(b);
+      setServiceData (a);
     }
 
-    const onView = async (e) => {
-      console.log ("test info btn");
+    const onView = (e) => {
+      const id = e.currentTarget.dataset.btnid;
+      navigate(`/musicGroups/${id}`);
     }
 
     return (
       <>
         <FormSearch searchFilter="" onSave={onSave} onUndo={onUndo}/>
-        <p className='container px-4 py4'>There are {amountGroups} music groups that matches your search.</p>
-        <div className='container px-4 py4'>
-          {musicGroups.pageItems?.map((a) => (
-            <div key={a.musicGroupId}>
-              <button className='btn btn-primary' onClick={onView}>More info</button>
-              {a.name}
-              <p/>
-            </div>
-          ))}          
-        </div>
-        <MusicPagination pageCount={musicGroups.pageCount} pageNr={0} onClick={onClick}/>
+        <AlbumList serviceData={serviceData} onClick={onView}/>
+        <MusicPagination serviceData={serviceData} pageNr={0} onClick={onClick}/>
       </>
     );
+}
+
+export function MusicGroupsView() {
+  const service = useOutletContext();
+  const { id } = useParams();
+
+  //to read the WebApi async to initialize a React component
+  const [musicGroup, setMusicGroup] = useState();
+
+  useEffect(() => {
+    async function readWebApi() {
+      const data = await service.readMusicGroupAsync(id, false);
+      setMusicGroup(data);
+    }
+    readWebApi(id);
+
+  }, [service,id])
+
+  if (musicGroup) {
+    return (
+      <>
+        <h1>
+          {musicGroup?.name} 
+        </h1>
+  
+        <AlbumDetailsView musicGroup={musicGroup}/>
+      </>
+      );
+  }
+
+  else {
+    return (<span>The music group doesn't exist.</span>);
+  }
+  
 }

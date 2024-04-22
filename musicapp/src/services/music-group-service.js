@@ -31,14 +31,14 @@ class musicService {
     
           //typcially you would log an error instead
           console.log(`Failed to recieved data from server: ${res.status}`);
-          alert(`Failed to recieved data from server: ${res.status}`);
+          //alert(`Failed to recieved data from server: ${res.status}`);
         }
       }
       catch (err) {
     
         //typcially you would log an error instead
         console.log(`Failed to recieved data from server: ${err.message}`);
-        alert(`Failed to recieved data from server: ${err.message}`);
+        //alert(`Failed to recieved data from server: ${err.message}`);
       }
     }
 

@@ -2,9 +2,8 @@ import Pagination from 'react-bootstrap/Pagination';
 
 export function MusicPagination(props) {
     
-    //let active = 2;
     let items = [];
-    const pageCount = props.pageCount;
+    const pageCount = props.serviceData?.pageCount;
 
     // items.push(
     //     <Pagination.Item key="prev">
